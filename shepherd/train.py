@@ -53,7 +53,7 @@ import faulthandler; faulthandler.enable()
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Learning node embeddings.")
-    
+
     # Input files/parameters
     parser.add_argument("--edgelist", type=str, default=None, help="File with edge list")
     parser.add_argument("--node_map", type=str, default=None, help="File with node list")
@@ -77,12 +77,12 @@ def parse_args():
     parser.add_argument('--kappa', type=float, default=0.3, help='Kappa (Only used for combined model with link prediction loss)')
     parser.add_argument('--seed', default=33, type=int)
     parser.add_argument('--batch_size', default=64, type=int) 
-    
+
     # Resume / run inference with best checkpoint
     parser.add_argument('--resume', default="", type=str)
     parser.add_argument('--do_inference', action='store_true')
     parser.add_argument('--best_ckpt', type=str, default=None, help='Name of the best performing checkpoint')
-    
+
     parser.add_argument('--use_wandb', type=bool, default=True)
 
     args = parser.parse_args()
@@ -103,7 +103,7 @@ def load_patient_datasets(hparams, inference=False):
         test_dataset = PatientDataset(project_config.PROJECT_DIR / 'patients' / hparams['test_data'], time=hparams['time'])
     else:
         test_dataset = None
-    
+
     print('finished loading patient datasets')
     return train_dataset, val_dataset, test_dataset
 
@@ -136,7 +136,7 @@ def get_dataloaders(hparams, all_data, nid_to_spl_dict, n_nodes, gene_phen_dis_n
         with open(str(project_config.PROJECT_DIR / 'patients' / hparams['spl_index']), "rb") as input_file:
             spl_indexing_dict = pickle.load(input_file)
     else: spl_indexing_dict=None # TODO: short term fix for simulated patients, get rid once we create this dict
-    
+
     print('Loaded SPL information')
 
     if args.aug_sim is not None:
@@ -145,7 +145,7 @@ def get_dataloaders(hparams, all_data, nid_to_spl_dict, n_nodes, gene_phen_dis_n
         print("Using augment gene similarity: %s" % args.aug_sim)
     else: gene_similarity_dict=None
 
-    with open("/home/ema30/zaklab/rare_disease_dx/formatted_patients/degree_dict_8.9.21_kg.pkl", "rb") as input_file:
+    with open(str(project_config.PROJECT_DIR / 'knowledge_graph/8.9.21_kg' / 'degree_dict_8.9.21_kg.pkl'), "rb") as input_file:
         gene_deg_dict = pickle.load(input_file)
 
     if inference:
@@ -175,7 +175,7 @@ def get_dataloaders(hparams, all_data, nid_to_spl_dict, n_nodes, gene_phen_dis_n
                         gene_similarity_dict = gene_similarity_dict, 
                         gene_deg_dict = gene_deg_dict)
         print('finished setting up val dataloader')
-    
+
     print('setting up test dataloader')
     if inference:
         sizes = [-1,10,5]
@@ -190,7 +190,7 @@ def get_dataloaders(hparams, all_data, nid_to_spl_dict, n_nodes, gene_phen_dis_n
                         gene_deg_dict = gene_deg_dict) 
     else: test_dataloader = None
     print('finished setting up test dataloader')
-    
+
     return train_dataloader, val_dataloader, test_dataloader
 
 
@@ -232,21 +232,21 @@ def train(args, hparams):
     n_nodes = len(nodes["node_idx"].unique())
     print(f'Number of nodes: {n_nodes}')
     gene_phen_dis_node_idx = torch.LongTensor(nodes.loc[nodes['node_type'].isin(['gene/protein', 'effect/phenotype', 'disease']), 'node_idx'].values)
-    
+
     if args.resume != "":
         print('Resuming Run')
         # create Weights & Biases Logger
         if ":" in args.resume: # colons are not allowed in ID/resume name
             resume_id = "_".join(args.resume.split(":"))
         run_name = args.resume
-        wandb_logger = WandbLogger(run_name, project=hparams['wandb_project_name'], entity='rare_disease_dx', save_dir=hparams['wandb_save_dir'], id=resume_id, resume=resume_id)
-        
+        wandb_logger = WandbLogger(run_name, project=hparams['wandb_project_name'], save_dir=hparams['wandb_save_dir'], id=resume_id, resume=resume_id)
+
         #add run name to hparams dict
         hparams['run_name'] = run_name
-        
+
         # get patient model 
         comb_patient_model = get_model(args, hparams, node_hparams, all_data, edge_attr_dict, n_nodes, load_from_checkpoint=True)
-        
+
     else:
         print('Creating new W&B Logger')
         # create Weights & Biases Logger
@@ -256,9 +256,9 @@ def train(args, hparams):
         run_name = "{}_val_{}".format(curr_time, val_data).replace('patients', 'pats') 
         run_name = run_name + f'_seed={args.seed}'
         run_name = run_name.replace('5_candidates_mapped_only', '5cand_map').replace('8.9.21_kgsolved_manual_baylor_nobgm_distractor_genes', 'manual').replace('patient_disease_NCA', 'pd_NCA').replace('_distractor', '')
-        wandb_logger = WandbLogger(name=run_name, project=hparams['wandb_project_name'], entity='rare_disease_dx', save_dir=hparams['wandb_save_dir'],
+        wandb_logger = WandbLogger(name=run_name, project=hparams['wandb_project_name'], save_dir=hparams['wandb_save_dir'],
                         id="_".join(run_name.split(":")), resume="allow") 
-        
+
         #add run name to hparams dict
         print('Run name', run_name)
         hparams['run_name'] = run_name
@@ -340,7 +340,7 @@ def inference(args, hparams):
     lr = hparams['lr']   
     test_data = hparams['test_data'].split('.txt')[0].replace('/', '.')
     run_name = "{}_lr_{}_test_{}".format(curr_time, lr, test_data)
-    wandb_logger = WandbLogger(run_name, project=hparams['wandb_project_name'], entity='rare_disease_dx', save_dir=hparams['wandb_save_dir'])
+    wandb_logger = WandbLogger(run_name, project=hparams['wandb_project_name'], save_dir=hparams['wandb_save_dir'])
     print('Run name: ', run_name)
     hparams['run_name'] = run_name
 
@@ -363,7 +363,7 @@ def inference(args, hparams):
 
 
 if __name__ == "__main__":
-    
+
     # Get hyperparameters
     args = parse_args()
     hparams = get_train_hparams(args)
