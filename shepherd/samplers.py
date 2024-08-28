@@ -460,7 +460,8 @@ class PatientNeighborSampler(torch.utils.data.DataLoader):
         node2batch[0] = 0
 
         # add phenotype / gene / disease names
-        data['phenotype_names'] = [[(self.patient_dataset.node_idx_to_name(p.item()), self.patient_dataset.node_idx_to_degree(p.item())) for p in p_list] for p_list in phenotype_node_idx ]
+        data['phenotype_names'] = [[(self.patient_dataset.node_idx_to_name(p.item())) for p in p_list] for p_list in phenotype_node_idx ] # remove degree dict info
+        # data['phenotype_names'] = [[(self.patient_dataset.node_idx_to_name(p.item()), self.patient_dataset.node_idx_to_degree(p.item())) for p in p_list] for p_list in phenotype_node_idx ]
         data['cand_gene_names'] = [[self.patient_dataset.node_idx_to_name(g.item()) for g in g_list] for g_list in candidate_gene_node_idx ]
         data['corr_gene_names'] = [[self.patient_dataset.node_idx_to_name(g.item()) for g in g_list] for g_list in correct_genes_node_idx  ]
         data['disease_names'] = [[self.patient_dataset.node_idx_to_name(d.item()) for d in d_list] for d_list in disease_node_idx ]
@@ -637,14 +638,23 @@ class PatientNeighborSampler(torch.utils.data.DataLoader):
         if self.hparams['add_similar_patients']:
             similar_pats = self.get_candidate_patients(patient_ids)
             # merge original batch with sampled patients
-            phenotype_node_idx_sim, candidate_gene_node_idx_sim, correct_genes_node_idx_sim, disease_node_idx_sim, labels_sim, additional_labels_sim, patient_ids_sim = zip(*similar_pats)
-            phenotype_node_idx = phenotype_node_idx + phenotype_node_idx_sim
-            candidate_gene_node_idx = candidate_gene_node_idx + candidate_gene_node_idx_sim
-            correct_genes_node_idx = correct_genes_node_idx + correct_genes_node_idx_sim
-            disease_node_idx = disease_node_idx + disease_node_idx_sim
-            labels = labels + labels_sim
-            additional_labels = additional_labels + additional_labels_sim
-            patient_ids = patient_ids + patient_ids_sim
+            try:
+                phenotype_node_idx_sim, candidate_gene_node_idx_sim, correct_genes_node_idx_sim, disease_node_idx_sim, labels_sim, additional_labels_sim, patient_ids_sim = zip(*similar_pats)
+                phenotype_node_idx = phenotype_node_idx + phenotype_node_idx_sim
+                candidate_gene_node_idx = candidate_gene_node_idx + candidate_gene_node_idx_sim
+                correct_genes_node_idx = correct_genes_node_idx + correct_genes_node_idx_sim
+                disease_node_idx = disease_node_idx + disease_node_idx_sim
+                labels = labels + labels_sim
+                additional_labels = additional_labels + additional_labels_sim
+                patient_ids = patient_ids + patient_ids_sim
+            except:
+                print('every patient in this batch is the only one with their causal gene')
+                print(patient_ids)
+                pass
+            # except:
+            #     print(patient_ids)
+            #     print(similar_pats)
+
         
         # get patient labels
         patient_labels = correct_genes_node_idx

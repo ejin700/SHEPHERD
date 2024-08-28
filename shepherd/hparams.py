@@ -191,8 +191,10 @@ def get_patient_data_args(args, hparams):
             'train_data': project_config.MY_TRAIN_DATA,
             'validation_data': project_config.MY_VAL_DATA,
             'test_data': project_config.MY_TEST_DATA,
-            'spl': project_config.MY_SPL_DATA, # Result of add_spl_to_patients.py (suffix: _spl_matrix.npy)
-            'spl_index': project_config.MY_SPL_INDEX_DATA, # Result of add_spl_to_patients.py (suffix: _spl_index_dict.pkl)
+            'spl': None,
+            'spl_index': None,
+            #'spl': project_config.MY_SPL_DATA, # Result of add_spl_to_patients.py (suffix: _spl_matrix.npy)
+            #'spl_index': project_config.MY_SPL_INDEX_DATA, # Result of add_spl_to_patients.py (suffix: _spl_index_dict.pkl)
         })
     else:
         raise Exception('You must specify patient data.')

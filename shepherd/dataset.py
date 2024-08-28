@@ -1,5 +1,3 @@
-
-
 import random
 import numpy as np
 import pandas as pd
@@ -59,8 +57,8 @@ class PatientDataset(Dataset):
 
         # degree dict from idx to degree - used for debugging
         #NOTE: may need to subtract 1 to index into this dict
-        with open(str(project_config.KG_DIR / f'degree_dict_{project_config.CURR_KG}.pkl'), 'rb') as handle:
-            self.degree_dict = pickle.load(handle)
+        # with open(str(project_config.KG_DIR / f'degree_dict_{project_config.CURR_KG}.pkl'), 'rb') as handle:
+        #     self.degree_dict = pickle.load(handle)
 
         # get patients with similar genes
         if all(['true_genes' in patient for patient in self.patients]): # first check to make sure all patients have true genes
@@ -74,16 +72,16 @@ class PatientDataset(Dataset):
                     self.patients_with_same_gene[p].extend([pat for pat in patients if pat != p])
 
         # get patients with similar diseases
-        if all(['true_diseases' in patient for patient in self.patients]): # first check to make sure all patients have true diseases
-            dis_to_patients = defaultdict(list)
-            for patient in self.patients:
-                patient_diseases = patient['true_diseases']
-                for d in patient_diseases: 
-                    dis_to_patients[d].append(patient['id'])
-            self.patients_with_same_disease = defaultdict(list)
-            for patients in dis_to_patients.values():
-                for p in patients:
-                    self.patients_with_same_disease[p].extend([pat for pat in patients if pat != p])
+        # if all(['true_diseases' in patient for patient in self.patients]): # first check to make sure all patients have true diseases
+        #     dis_to_patients = defaultdict(list)
+        #     for patient in self.patients:
+        #         patient_diseases = patient['true_diseases']
+        #         for d in patient_diseases: 
+        #             dis_to_patients[d].append(patient['id'])
+        #     self.patients_with_same_disease = defaultdict(list)
+        #     for patients in dis_to_patients.values():
+        #         for p in patients:
+        #             self.patients_with_same_disease[p].extend([pat for pat in patients if pat != p])
 
         # map from patient id to index in dataset
         self.patient_id_to_index = {p['id']:i for i, p in enumerate(self.patients)}

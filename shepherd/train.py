@@ -111,7 +111,7 @@ def load_patient_datasets(hparams, inference=False):
 def get_dataloaders(hparams, all_data, nid_to_spl_dict, n_nodes, gene_phen_dis_node_idx, train_dataset, val_dataset, test_dataset, inference=False):
     print('Get dataloaders', flush=True)
     shuffle = False if hparams['debug'] or inference else True
-    if not hparams['sample_from_gpd']: gene_phen_dis_node_idx = None
+    if not hparams['sample_from_gpd']: gene_phen_dis_node_idx = None # i this this is file to leave as Tue
     batch_sz = hparams['inference_batch_size'] if inference else hparams['batch_size']
     sparse_sample = 1 if inference else hparams['sparse_sample']
 
@@ -131,11 +131,15 @@ def get_dataloaders(hparams, all_data, nid_to_spl_dict, n_nodes, gene_phen_dis_n
     print('Loading SPL...')
     if hparams['spl'] is not None:
         spl = np.load(project_config.PROJECT_DIR / 'patients' / hparams['spl'])  
-    else: spl = None
+    else: 
+        spl = None
+        print('no SPL')
     if hparams['spl_index'] is not None and (project_config.PROJECT_DIR / 'patients' / hparams['spl_index']).exists():
         with open(str(project_config.PROJECT_DIR / 'patients' / hparams['spl_index']), "rb") as input_file:
             spl_indexing_dict = pickle.load(input_file)
-    else: spl_indexing_dict=None # TODO: short term fix for simulated patients, get rid once we create this dict
+    else: 
+        spl_indexing_dict=None # TODO: short term fix for simulated patients, get rid once we create this dict
+        print('no SPL index')
 
     print('Loaded SPL information')
 
@@ -145,8 +149,10 @@ def get_dataloaders(hparams, all_data, nid_to_spl_dict, n_nodes, gene_phen_dis_n
         print("Using augment gene similarity: %s" % args.aug_sim)
     else: gene_similarity_dict=None
 
-    with open(str(project_config.PROJECT_DIR / 'knowledge_graph/8.9.21_kg' / 'degree_dict_8.9.21_kg.pkl'), "rb") as input_file:
-        gene_deg_dict = pickle.load(input_file)
+    # with open(str(project_config.PROJECT_DIR / 'knowledge_graph/8.9.21_kg' / 'degree_dict_8.9.21_kg.pkl'), "rb") as input_file:
+    #     gene_deg_dict = pickle.load(input_file)
+    print('setting gene degree dict to None')
+    gene_deg_dict = None
 
     if inference:
         train_dataloader = None

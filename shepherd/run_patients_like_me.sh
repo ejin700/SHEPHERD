@@ -7,12 +7,13 @@
 python train.py \
         --edgelist KG_edgelist_mask.txt \
         --node_map KG_node_map.txt \
-        --patient_data disease_simulated \
+        --patient_data my_data \
         --run_type patients_like_me \
-        --saved_node_embeddings_path checkpoints/pretrain.ckpt \
+        --saved_node_embeddings_path checkpoints/new_pretrain.ckpt \
         --sparse_sample 300 \
         --lr 5e-05 \
         --upsample_cand 1 \
         --neighbor_sampler_size 15 \
         --lmbda 0.7 \
-        --kappa 0.09000000000000001
+        --kappa 0.09000000000000001 \
+        --batch_size 2
