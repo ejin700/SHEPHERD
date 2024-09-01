@@ -107,7 +107,7 @@ def get_train_hparams(args):
         'sample_edges_from_train_patients': False, # Preferentially sample edges connected to training patients
         'gradclip': 1.0,
         'inference_batch_size': 64,
-        'max_epochs': 100,
+        'max_epochs': 1,
         'n_gpus': 1,
         'num_workers': 4,
         'wandb_save_dir' : project_config.PROJECT_DIR / 'wandb',
@@ -220,9 +220,10 @@ def get_predict_hparams(args):
         'log_gpu_memory': False,
         'debug': False,
 
-        'augment_genes': True,
+        'augment_genes': False, #True,
         'n_sim_genes': 3,
         'aug_gene_w': 0.5,
+        'alpha': 100,
 
         'wandb_save_dir' : project_config.PROJECT_DIR / 'wandb',
         'saved_checkpoint_path': project_config.PROJECT_DIR  / f'{args.saved_node_embeddings_path}',

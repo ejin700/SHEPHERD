@@ -15,7 +15,7 @@ import project_config
 
 class PatientDataset(Dataset):
 
-    def __init__(self, filepath, gp_spl=None, raw_data=False, mondo_map_file=str(project_config.PROJECT_DIR / 'mondo_references.csv'), needs_disease_mapping=False, time=False): 
+    def __init__(self, filepath, gp_spl=None, raw_data=False, mondo_map_file=str(project_config.PROJECT_DIR / 'mondo_references.csv'), needs_disease_mapping=True, time=False): 
         self.filepath = filepath
         self.patients = read_patients(filepath)
         print('Dataset filepath: ', filepath)
@@ -28,6 +28,8 @@ class PatientDataset(Dataset):
 
         self.raw_data = raw_data
         self.needs_disease_mapping = needs_disease_mapping
+        print('disease mapping status')
+        print(self.needs_disease_mapping)
         self.time = time
 
         # create HPO to node_idx map

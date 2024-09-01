@@ -208,7 +208,7 @@ class CombinedPatientNCA(pl.LightningModule):
     def write_results_to_file(self, batch, softmax, correct_ranks, labels, phenotype_mask, disease_mask, attn_weights,  gat_attn, node_embeddings, phenotype_embeddings, disease_embeddings, save=True, loop_type='predict'):
         
         if save:
-            run_folder = Path(project_config.PROJECT_DIR) / 'checkpoints' / 'patient_NCA' / self.hparams.hparams['run_name'] / (Path(self.test_dataloader.dataloader.dataset.filepath).stem ) #.replce('/', '_')
+            run_folder = Path(project_config.PROJECT_DIR) / 'checkpoints' / 'patient_NCA' / self.hparams.hparams['run_name'] / 'predict' #.replce('/', '_')
             run_folder.mkdir(parents=True, exist_ok=True)
             print('run_folder', run_folder)
         
@@ -244,12 +244,14 @@ class CombinedPatientNCA(pl.LightningModule):
         else:
             all_patient_ids, all_phens, all_attn_weights, all_degrees = [], [], [], []
             for patient_id, attn_w, phen_names, p_mask in zip(batch['patient_ids'], attn_weights, batch['phenotype_names'], phenotype_mask):
-                p_names, degrees = zip(*phen_names)
+                p_names = phen_names
+                # p_names, degrees = zip(*phen_names)
                 all_patient_ids.extend([patient_id] * len(phen_names))
-                all_degrees.extend(degrees)
+                # all_degrees.extend(degrees)
                 all_phens.extend(p_names)
                 all_attn_weights.extend(attn_w[p_mask].tolist())
-            phen_df = pd.DataFrame({'patient_id': all_patient_ids, 'phenotypes': all_phens, 'degrees': all_degrees, 'attention':all_attn_weights})
+            phen_df = pd.DataFrame({'patient_id': all_patient_ids, 'phenotypes': all_phens, 'attention':all_attn_weights})
+            # phen_df = pd.DataFrame({'patient_id': all_patient_ids, 'phenotypes': all_phens, 'degrees': all_degrees, 'attention':all_attn_weights})
             print(phen_df.head())
             if save:
                 phen_df.to_csv(Path(run_folder) /'phenotype_attention.csv', sep = ',', index=False)

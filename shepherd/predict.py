@@ -98,11 +98,14 @@ def predict(args):
 
     # Get dataset
     print('Loading SPL...')
-    spl = np.load(project_config.PROJECT_DIR / 'patients' / hparams['spl'])  
-    if (project_config.PROJECT_DIR / 'patients' / hparams['spl_index']).exists():
-        with open(str(project_config.PROJECT_DIR / 'patients' / hparams['spl_index']), "rb") as input_file:
-            spl_indexing_dict = pickle.load(input_file)
-    else: spl_indexing_dict = None 
+    # spl = np.load(project_config.PROJECT_DIR / 'patients' / hparams['spl'])  
+    # if (project_config.PROJECT_DIR / 'patients' / hparams['spl_index']).exists():
+    #     with open(str(project_config.PROJECT_DIR / 'patients' / hparams['spl_index']), "rb") as input_file:
+    #         spl_indexing_dict = pickle.load(input_file)
+    # else: spl_indexing_dict = None 
+    spl = None
+    spl_indexing_dict = None
+    print('there is no SPL information')
     print('Loaded SPL information')
     
     dataset = PatientDataset(project_config.PROJECT_DIR / 'patients' / hparams['test_data'], time=hparams['time'])
