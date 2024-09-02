@@ -15,7 +15,7 @@ import project_config
 
 class PatientDataset(Dataset):
 
-    def __init__(self, filepath, gp_spl=None, raw_data=False, mondo_map_file=str(project_config.PROJECT_DIR / 'mondo_references.csv'), needs_disease_mapping=True, time=False): 
+    def __init__(self, filepath, gp_spl=None, raw_data=False, mondo_map_file=str(project_config.PROJECT_DIR / 'mondo_references.csv'), needs_disease_mapping=True, time=False, embedding_mode='shepherd'): 
         self.filepath = filepath
         self.patients = read_patients(filepath)
         print('Dataset filepath: ', filepath)
@@ -31,6 +31,9 @@ class PatientDataset(Dataset):
         print('disease mapping status')
         print(self.needs_disease_mapping)
         self.time = time
+
+        # making minerva changes here with embedding_mode flag
+        self.embedding_mode = embedding_mode
 
         # create HPO to node_idx map
         with open(project_config.KG_DIR / f'hpo_to_idx_dict_{project_config.CURR_KG}.pkl', 'rb') as handle:
@@ -74,16 +77,17 @@ class PatientDataset(Dataset):
                     self.patients_with_same_gene[p].extend([pat for pat in patients if pat != p])
 
         # get patients with similar diseases
-        # if all(['true_diseases' in patient for patient in self.patients]): # first check to make sure all patients have true diseases
-        #     dis_to_patients = defaultdict(list)
-        #     for patient in self.patients:
-        #         patient_diseases = patient['true_diseases']
-        #         for d in patient_diseases: 
-        #             dis_to_patients[d].append(patient['id'])
-        #     self.patients_with_same_disease = defaultdict(list)
-        #     for patients in dis_to_patients.values():
-        #         for p in patients:
-        #             self.patients_with_same_disease[p].extend([pat for pat in patients if pat != p])
+        # ths actually isnt used for patients-like-me since patient_similarity_type is set to gene, not disease, so can uncomment
+        if all(['true_diseases' in patient for patient in self.patients]): # first check to make sure all patients have true diseases
+            dis_to_patients = defaultdict(list)
+            for patient in self.patients:
+                patient_diseases = patient['true_diseases']
+                for d in patient_diseases: 
+                    dis_to_patients[d].append(patient['id'])
+            self.patients_with_same_disease = defaultdict(list)
+            for patients in dis_to_patients.values():
+                for p in patients:
+                    self.patients_with_same_disease[p].extend([pat for pat in patients if pat != p])
 
         # map from patient id to index in dataset
         self.patient_id_to_index = {p['id']:i for i, p in enumerate(self.patients)}
@@ -120,6 +124,9 @@ class PatientDataset(Dataset):
         if 'all_candidate_genes' in patient:
             candidate_gene_node_idx = [self.ensembl_to_idx_dict[g] for g in patient['all_candidate_genes'] if g in self.ensembl_to_idx_dict ]
         else: candidate_gene_node_idx = []
+
+        if self.embedding_mode == 'minerva':
+            phenotype_node_idx += candidate_gene_node_idx
 
         if 'true_diseases' in patient:
             if self.needs_disease_mapping:
