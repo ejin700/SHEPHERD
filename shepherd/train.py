@@ -76,7 +76,8 @@ def parse_args():
     parser.add_argument('--alpha', type=float, default=0, help='Alpha')
     parser.add_argument('--kappa', type=float, default=0.3, help='Kappa (Only used for combined model with link prediction loss)')
     parser.add_argument('--seed', default=33, type=int)
-    parser.add_argument('--batch_size', default=64, type=int) 
+    parser.add_argument('--batch_size', default=64, type=int)
+    parser.add_argument('--embedding_mode', type=str, default='shepherd', help='Type of patient embedding model')
 
     # Resume / run inference with best checkpoint
     parser.add_argument('--resume', default="", type=str)
@@ -96,8 +97,8 @@ def load_patient_datasets(hparams, inference=False):
         train_dataset = None
         val_dataset = None
     else:
-        train_dataset = PatientDataset(project_config.PROJECT_DIR / 'patients' / hparams['train_data'],  time=hparams['time'], embedding_mode='minerva')
-        val_dataset = PatientDataset(project_config.PROJECT_DIR / 'patients' / hparams['validation_data'], time=hparams['time'], embedding_mode='minerva')
+        train_dataset = PatientDataset(project_config.PROJECT_DIR / 'patients' / hparams['train_data'],  time=hparams['time'], embedding_mode=hparams['embedding_mode'])
+        val_dataset = PatientDataset(project_config.PROJECT_DIR / 'patients' / hparams['validation_data'], time=hparams['time'], embedding_mode=hparams['embedding_mode'])
 
     if inference:
         test_dataset = PatientDataset(project_config.PROJECT_DIR / 'patients' / hparams['test_data'], time=hparams['time'])

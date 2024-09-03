@@ -77,6 +77,7 @@ def get_train_hparams(args):
         'kappa': (1 - args.lmbda) * args.kappa,
         'seed': args.seed,
         'batch_size': args.batch_size,
+        'embedding_mode': args.embedding_mode,
 
         'augment_genes': False, #True if args.aug_gene_w > 0 else False, NOTE: This file is missing from repo
         'n_sim_genes': args.n_sim_genes,
@@ -224,6 +225,7 @@ def get_predict_hparams(args):
         'n_sim_genes': 3,
         'aug_gene_w': 0.5,
         'alpha': 100,
+        'embedding_mode': args.embedding_mode,
 
         'wandb_save_dir' : project_config.PROJECT_DIR / 'wandb',
         'saved_checkpoint_path': project_config.PROJECT_DIR  / f'{args.saved_node_embeddings_path}',

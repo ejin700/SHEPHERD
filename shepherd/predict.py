@@ -77,6 +77,7 @@ def parse_args():
     parser.add_argument('--run_type', choices=["causal_gene_discovery", "disease_characterization", "patients_like_me"], type=str)
     parser.add_argument('--saved_node_embeddings_path', type=str, default=None, help='Path to pretrained model checkpoint')
     parser.add_argument('--best_ckpt', type=str, default=None, help='Name of the best performing checkpoint')
+    parser.add_argument('--embedding_mode', type=str, default='shepherd', help='Type of patient embedding model')
     args = parser.parse_args()
     return args
 
@@ -108,7 +109,7 @@ def predict(args):
     print('there is no SPL information')
     print('Loaded SPL information')
     
-    dataset = PatientDataset(project_config.PROJECT_DIR / 'patients' / hparams['test_data'], time=hparams['time'])
+    dataset = PatientDataset(project_config.PROJECT_DIR / 'patients' / hparams['test_data'], time=hparams['time'], embedding_mode='shepherd')
     print(f'There are {len(dataset)} patients in the test dataset')
     hparams.update({'inference_batch_size': len(dataset)})
     print('batch size: ', hparams['inference_batch_size'])
@@ -126,7 +127,7 @@ def predict(args):
     
     # Create Weights & Biases Logger
     run_name = 'test'
-    wandb_logger = WandbLogger(name=run_name, project='rare_disease_dx_combined', entity='rare_disease_dx', save_dir=hparams['wandb_save_dir'],
+    wandb_logger = WandbLogger(name=run_name, project='rare_disease_dx_combined', save_dir=hparams['wandb_save_dir'],
                     id="_".join(run_name.split(":")), resume="allow") 
 
     # Get patient model 
@@ -145,6 +146,9 @@ def predict(args):
     if not os.path.exists(project_config.PROJECT_DIR / 'results'):
         os.mkdir(project_config.PROJECT_DIR / 'results')
     output_base = project_config.PROJECT_DIR / 'results' /  (str(args.best_ckpt).replace('/', '.').split('.ckpt')[0])     
+    print(args.best_ckpt)
+    print(output_base)
+
 
     # Save scores
     scores_df = pd.concat(scores_dfs).reset_index(drop=True)
